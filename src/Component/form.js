@@ -1,6 +1,7 @@
 import React from "react";
 class Form extends React.Component {
   state = {
+    Attributes:"",
     dependency: [],
     show: true
   };
@@ -95,13 +96,29 @@ class Form extends React.Component {
   handelSubmit = (e) => {
     e.preventDefault();
     console.log(this.state.dependency);
+    let attr = this.state.Attributes.split(',');
+    let left = this.state.dependency.map((dependency)=>{return dependency.left.split(",")})
+    let right = this.state.dependency.map((dependency)=>{return dependency.right.split(",")})
+    let data = {
+      "attribute":attr,
+      "fd":[left,right]
+    }
+    console.log(JSON.stringify(data))
     this.setState({
       ...this.state,
       show: false
     });
   };
+
+  addAttribute=(e)=>{
+    let attr = e.target.value;
+    
+    this.setState({
+      Attributes:attr
+    })
+  }
   render() {
-    console.log(this.state.dependency);
+    console.log(this.state);
     return (
       <div>
         <h3>Normalization Tool</h3>
@@ -110,7 +127,7 @@ class Form extends React.Component {
         {this.state.show ? (
           <form className="form" onSubmit={this.handelSubmit}>
             <h2>Attributes in Table</h2>
-            <textarea class="rounded" cols="100" rows="3" />
+            <textarea class="rounded" cols="50" rows="3" onChange={this.addAttribute}/>
             <h2>Functional Dependencies</h2>
             {this.showDependency()}
             <br></br>
