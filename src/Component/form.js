@@ -1,7 +1,8 @@
 import React from "react";
+import axios from "axios";
 class Form extends React.Component {
   state = {
-    Attributes:"",
+    Attributes: "",
     dependency: [],
     show: true
   };
@@ -96,27 +97,44 @@ class Form extends React.Component {
   handelSubmit = (e) => {
     e.preventDefault();
     console.log(this.state.dependency);
-    let attr = this.state.Attributes.split(',');
-    let left = this.state.dependency.map((dependency)=>{return dependency.left.split(",")})
-    let right = this.state.dependency.map((dependency)=>{return dependency.right.split(",")})
-    let data = {
-      "attribute":attr,
-      "fd":[left,right]
-    }
-    console.log(JSON.stringify(data))
-    this.setState({
-      ...this.state,
-      show: false
+    let attr = this.state.Attributes.split(",");
+    let left = this.state.dependency.map((dependency) => {
+      return dependency.left.split(",");
     });
+    let right = this.state.dependency.map((dependency) => {
+      return dependency.right.split(",");
+    });
+    let data = {
+      attribute: attr,
+      fd: [left, right]
+    };
+    let headers = {
+      "Content-Type": "appplication/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Request-Header": "X-PINGOTHER , Content-Type"
+    };
+    axios
+      .post("http://localhost:5000/Decompose", data, { headers: headers })
+      .then((res) => {
+        console.log(res);
+        this.setState({
+          ...this.state,
+          show: false
+        });
+      })
+      .catch((err) => {
+        console.log("machuda", err);
+      });
+    //console.log(JSON.stringify(data))
   };
 
-  addAttribute=(e)=>{
+  addAttribute = (e) => {
     let attr = e.target.value;
-    
+
     this.setState({
-      Attributes:attr
-    })
-  }
+      Attributes: attr
+    });
+  };
   render() {
     console.log(this.state);
     return (
@@ -127,7 +145,12 @@ class Form extends React.Component {
         {this.state.show ? (
           <form className="form" onSubmit={this.handelSubmit}>
             <h2>Attributes in Table</h2>
-            <textarea class="rounded" cols="50" rows="3" onChange={this.addAttribute}/>
+            <textarea
+              class="rounded"
+              cols="50"
+              rows="3"
+              onChange={this.addAttribute}
+            />
             <h2>Functional Dependencies</h2>
             {this.showDependency()}
             <br></br>
