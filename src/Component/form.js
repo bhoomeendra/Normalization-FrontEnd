@@ -1,11 +1,23 @@
 import React from "react";
 import axios from "axios";
+import Response from "./Response";
 class Form extends React.Component {
-  state = {
-    Attributes: "",
-    dependency: [],
-    show: true
-  };
+  constructor() {
+    super();
+    let state = {
+      Attributes: "",
+      dependency: [],
+      show: true,
+      res: {},
+      showResponse: false,
+      normalForm: "2NF"
+    };
+    this.state = state;
+    this.onClick2NF= this.onClick2NF.bind(this);
+    this.onClick3NF= this.onClick3NF.bind(this);
+    this.onClickBCNF= this.onClickBCNF.bind(this);
+  }
+
   addDependency = (e) => {
     e.preventDefault();
     const id = Math.random();
@@ -62,6 +74,7 @@ class Form extends React.Component {
                 type="text"
                 class="rounded"
                 value={data.left}
+                placeholder="eg. a,b"
                 onChange={(e) => {
                   this.handleChangeLeft(e, data.id);
                 }}
@@ -73,6 +86,7 @@ class Form extends React.Component {
                 type="text"
                 class="rounded"
                 value={data.right}
+                placeholder="eg. c,d"
                 onChange={(e) => {
                   this.handleChangeRight(e, data.id);
                 }}
@@ -117,13 +131,14 @@ class Form extends React.Component {
       .post("http://localhost:5000/Decompose", data, { headers: headers })
       .then((res) => {
         console.log(res);
+        //Make a new page Here
         this.setState({
-          ...this.state,
+          res: res,
           show: false
         });
       })
       .catch((err) => {
-        console.log("machuda", err);
+        console.log("error in API Call", err);
       });
     //console.log(JSON.stringify(data))
   };
@@ -135,40 +150,104 @@ class Form extends React.Component {
       Attributes: attr
     });
   };
+
+  onClick2NF(e) {
+    this.setState({
+      normalForm: "2NF"
+    });
+  }
+  onClick3NF(e) {
+    this.setState({
+      normalForm: "3NF"
+    });
+  }
+  onClickBCNF(e) {
+    this.setState({
+      normalForm: "BCNF"
+    });
+  }
   render() {
-    console.log(this.state);
+    console.log("LOL ", this.state);
     return (
-      <div>
+      // Trenary out side the return
+      <div style={{ display: "block" }}>
         <h3>Normalization Tool</h3>
-        <br></br>
-        <br></br>
-        {this.state.show ? (
-          <form className="form" onSubmit={this.handelSubmit}>
-            <h2>Attributes in Table</h2>
-            <textarea
-              class="rounded"
-              cols="50"
-              rows="3"
-              onChange={this.addAttribute}
-            />
-            <h2>Functional Dependencies</h2>
-            {this.showDependency()}
-            <br></br>
-            <button class="btn btn-primary btn-sm" onClick={this.addDependency}>
-              {" "}
-              Add Dependencies{" "}
-            </button>
-            <br></br>
-            <br></br>
-            <input
-              type="submit"
-              class="btn btn-success"
-              onSubmit={this.handelSubmit}
-            />
-          </form>
-        ) : (
-          <div>hello</div>
-        )}
+        <div>
+          <br></br>
+          <br></br>
+          {this.state.show ? (
+            <form className="form" onSubmit={this.handelSubmit}>
+              <h2>Attributes in Table</h2>
+              <textarea
+                placeholder="Enter Comma Separated Attributes : eg . a,b,c,d"
+                class="rounded"
+                cols="50"
+                rows="3"
+                onChange={this.addAttribute}
+              />
+              <h2>Functional Dependencies</h2>
+              {this.showDependency()}
+              <br></br>
+              <button
+                class="btn btn-primary btn-sm"
+                onClick={this.addDependency}
+              >
+                {" "}
+                Add Dependencies{" "}
+              </button>
+              <br></br>
+              <br></br>
+              <input
+                type="submit"
+                class="btn btn-success"
+                onSubmit={this.handelSubmit}
+              />
+            </form>
+          ) : (
+            <div>
+              <div style={{ float: "left", width: "15%"}}>
+                {/* <div style={{ borderRight: "1px solid", lineHeight: "50px"}}></div> */}
+                <div>
+                  <button
+                    class="btn btn-primary btn-sm"
+                    style={{ width: "100%", height: "50px" }}
+                    onClick={this.onClick2NF}
+                  >
+                    <strong>2NF</strong>
+                  </button>
+                  <br />
+                  <br />
+                  <br />
+                  <button
+                    class="btn btn-primary btn-sm"
+                    style={{ width: "100%", height: "50px" }}
+                    onClick={this.onClick3NF}
+                  >
+                    <strong>3NF</strong>
+                  </button>
+                  <br />
+                  <br />
+                  <br />
+                  <button
+                    class="btn btn-primary btn-sm"
+                    style={{ width: "100%", height: "50px" }}
+                    onClick={this.onClickBCNF}
+                  >
+                    <strong>BCNF</strong>
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ width: "80%", background: "", float: "right" }}>
+                {console.log("Res: ", this.state.res)}
+                <Response
+                  response={this.state.res.data}
+                  normalForm={this.state.normalForm}
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
